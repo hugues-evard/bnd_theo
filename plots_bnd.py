@@ -4,29 +4,17 @@ import cmsstyle as CMS
 import math
 
 def create_canvas(
-        # canvName: str,
-        # ranges: Dict[str, Tuple[float, float]],
-        # nameAxis: Dict[str, str],
-        # logAxis: Dict[str, bool] = {"x": False, "y": True, "z": False},
-        # square: bool = CMS.kRectangular,
-        # iPos: int = 11,
-        # extraSpace: float = 0,
-        # with_z_axis: bool = False,
-
-        canvName,
-        ranges,
-        nameAxis,
-        logAxis = {"x": False, "y": True, "z": False},
-        square = CMS.kRectangular,
-        iPos = 11,
-        extraSpace = 0,
-        # with_z_axis: bool = False,
+        canvName,   # str
+        ranges,     # Dict[str, Tuple[float, float]],
+        nameAxis,   # Dict[str, str],
+        logAxis     = {"x": False, "y": True, "z": False},
+        square      = CMS.kRectangular,
+        iPos        = 11,
+        extraSpace  = 0,
         ):
+    """ Create a canvas object """
 
-    CMS.SetLumi("Simulation, 13 TeV")
-
-    upper_pad = None
-    ratio_pad = None
+    # === put arguments in a dict
 
     canv_infos = {
         "canvName": canvName,
@@ -41,10 +29,28 @@ def create_canvas(
         "extraSpace": extraSpace,
     }
 
+    # ==== Set top right text
+
+    CMS.SetLumi("Simulation, 13 TeV")
+
+    # ==== Set up left text inside canvas
+
+    CMS.SetExtraText("")
+
+    # ==== Create ref to upper and ratio pad
+
+    upper_pad = None
+    ratio_pad = None
+
+    # ==== Creating the canvas
+
+    # == If no ratio pad, only create the upper pad, set the axis
     if not "r" in ranges:
         canv = CMS.cmsCanvas(**canv_infos)
         canv.SetLogy(logAxis["y"])
         canv.SetLogx(logAxis["x"])
+
+    # == If there is a ratio pad, create both upper and ratio pad, set the axis
     else:
         canv_infos["r_min"] = ranges["r"][0]
         canv_infos["r_max"] = ranges["r"][1]
@@ -61,30 +67,40 @@ def create_canvas(
 
     return canv
 
+# ===========
+
 def create_leg(
-
-    # ===== Legend
-
-    n_legentries,
-    colwidth=0.20,
-    x_high=0.9,
-    y_high=0.88,
-    textSize=0.05,
-    height_per_legitem=0.07,
+    n_legentries,       # int
+    colwidth            = 0.20,
+    x_high              = 0.9,
+    y_high              = 0.88,
+    textSize            = 0.05,
+    height_per_legitem  = 0.07,
     ):
+    """ Create legend object """
+
+    # == Set the proper number of colums
 
     n_legentries_per_col = 6
     n_legcols = int((n_legentries - 1) / n_legentries_per_col + 1)
+
+    # == Set the margins
+
     leg_x_high = x_high
     leg_x_low = leg_x_high - n_legcols * colwidth
     leg_y_high = y_high
+
     max_num_entries_per_col = math.ceil(float(n_legentries) / float(n_legcols))
     leg_y_low = leg_y_high - height_per_legitem * max_num_entries_per_col
+
+    # == Create the legend
+
     leg = CMS.cmsLeg(leg_x_low, leg_y_low, leg_x_high, leg_y_high, textSize=textSize)
     leg.SetNColumns(n_legcols)
 
     return leg
 
+# =============
 
 def main():
 
@@ -92,26 +108,37 @@ def main():
 
     indir = "./outputs/"
     outdir = "./plots/"
-    # fname = "pT_thigh__NLO_QCD" 
     scales = ["HT2", "mttbar2"]
 
     for fname in scales:
 
-        # =========== creating plotter and canvas
+        # =========== creating canvas and legend
 
         canv = create_canvas(
-                canvName =  "test_canvas",
-                ranges = {"x": (0., 800.), "y": (1., 15000.)}, #, "r": (-1., 1.)},
-                logAxis = {"x": False, "y": True}, 
-                nameAxis = {"x": "p_{T, t_{high}}", "y": r"d\sigma/dp_{T, t_{high}} [pb #times GeV^{-1}]"}, # "r": "ratio axis"},
-                square = True,
-                iPos = 10, 
-                extraSpace = 0.075,
+                canvName    = "test_canvas",
+                ranges      = {"x": (0., 800.), "y": (1., 15000.)}, #, "r": (-1., 1.)},
+                logAxis     = {"x": False, "y": True}, 
+                nameAxis    = {"x": "p_{T, t}", "y": r"d\sigma/dp_{T, t} [pb #times GeV^{-1}]"}, # "r": "ratio axis"},
+                square      = True,
+                iPos        = 10, 
+                extraSpace  = 0.075,
                 )
+
         leg = create_leg( n_legentries = 2)
 
-
         # =========== reading data
+
+        # plotting kwargs
+        plot_args = {
+            "pT_thigh__NLO_QCD": {
+                "mcolor": rt.kBlack,
+                "leg_entry": "t_{high}",
+            },
+            "pT_tlow__NLO_QCD": {
+                "mcolor": rt.kRed,
+                "leg_entry": "t_{low}",
+            },
+        }
 
         infile = rt.TFile.Open(indir + fname + ".root", "read")
         for dist in ["pT_thigh__NLO_QCD" , "pT_tlow__NLO_QCD"]:
@@ -124,17 +151,10 @@ def main():
                     "h": graph,
                     "style": "P",
                     "marker": 0,
-                    # "msize": 1.0,
-                    "mcolor": rt.kBlack,
-                    # "lstyle": rt.kSolid,
-                    # "lwidth": 1,
-                    # "lcolor": rt.kRed + 1,
-                    # "fstyle": 1001,
-                    # "fcolor": rt.kYellow + 1,
-                    # "alpha": -1
+                    "mcolor": plot_args[dist]["mcolor"],
                     }
             CMS.cmsDraw(**graph_args)
-            leg.AddEntry(graph, "entry", "lp")
+            leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
 
         # ===== saving plot
 
@@ -148,18 +168,6 @@ def main():
             # CMS.fixOverlay()
 
         CMS.SaveCanvas(canv, outdir+fname+".pdf")
-
-
-def makeplot():
-
-    # create canvas
-
-    # read .rood
-
-    # for graph in graph:
-    #   do_plot(graph, **kwargs)
-    pass
-
 
 if __name__ == "__main__":
     main()
