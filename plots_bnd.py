@@ -108,66 +108,90 @@ def main():
 
     indir = "./outputs/"
     outdir = "./plots/"
-    scales = ["HT2", "mttbar2"]
+    scales = ["HT_2", "HT_4", "m_ttx_2"]
 
-    for fname in scales:
+    for top in ["t1", "t2"]:
 
-        # =========== creating canvas and legend
+        top_label = {"t1": "t_{high}", "t2": "t_{low}"}[top]
 
-        canv = create_canvas(
-                canvName    = "test_canvas",
-                ranges      = {"x": (0., 800.), "y": (1., 15000.)}, #, "r": (-1., 1.)},
-                logAxis     = {"x": False, "y": True}, 
-                nameAxis    = {"x": "p_{T, t}", "y": r"d\sigma/dp_{T, t} [pb #times GeV^{-1}]"}, # "r": "ratio axis"},
-                square      = True,
-                iPos        = 10, 
-                extraSpace  = 0.075,
-                )
+        for fname in scales:
 
-        leg = create_leg( n_legentries = 2)
+            # =========== creating canvas and legend
 
-        # =========== reading data
+            canv = create_canvas(
+                    canvName    = "test_canvas",
+                    # ranges      = {"x": (0., 800.), "y": (1., 15000.)}, #, "r": (-1., 1.)},
+                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.)}, #, "r": (-1., 1.)},
+                    logAxis     = {"x": False, "y": True}, 
+                    nameAxis    = {"x": "p_{T, t}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]"}, # "r": "ratio axis"},
+                    square      = True,
+                    iPos        = 10, 
+                    extraSpace  = 0.075,
+                    )
 
-        # plotting kwargs
-        plot_args = {
-            "pT_thigh__NLO_QCD": {
-                "mcolor": rt.kBlack,
-                "leg_entry": "t_{high}",
-            },
-            "pT_tlow__NLO_QCD": {
-                "mcolor": rt.kRed,
-                "leg_entry": "t_{low}",
-            },
-        }
+            leg = create_leg( n_legentries = 2)
 
-        infile = rt.TFile.Open(indir + fname + ".root", "read")
-        for dist in ["pT_thigh__NLO_QCD" , "pT_tlow__NLO_QCD"]:
+            # =========== reading data
 
-            graph = infile.Get(dist)
+            # plotting kwargs
+            plot_args = {
+                f"plot.pT_{top}..LO": {
+                    "mcolor": rt.kBlack,
+                    "leg_entry": "LO",
+                },
+                f"plot.pT_{top}..NLO.QCD": {
+                    "mcolor": rt.kRed,
+                    "leg_entry": "NLO",
+                },
+                f"plot.pT_{top}..NNLO.QCD": {
+                    "mcolor": rt.kBlue,
+                    "leg_entry": "NNLO",
+                },
+            }
 
-            # =========== plotting
+            infile = rt.TFile.Open(indir + fname + ".root", "read")
 
-            graph_args = {
-                    "h": graph,
-                    "style": "P",
-                    "marker": 0,
-                    "mcolor": plot_args[dist]["mcolor"],
-                    }
-            CMS.cmsDraw(**graph_args)
-            leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
+            # TODO: same distribution, at different orders, + data and ratio plot
 
-        # ===== saving plot
+            for dist in [
+                f"plot.pT_{top}..LO",
+                f"plot.pT_{top}..NLO.QCD",
+                f"plot.pT_{top}..NNLO.QCD",
+                ]:
 
-        # if upper_pad:
-            # upper_pad.cd()
-            # CMS.fixOverlay()
-            # ratio_pad.cd()
-            # CMS.fixOverlay()
-        # else:
-            # canv.cd()
-            # CMS.fixOverlay()
+                graph = infile.Get(dist)
 
-        CMS.SaveCanvas(canv, outdir+fname+".pdf")
+                # =========== plotting
+
+                graph_args = {
+                        "h": graph,
+                        "style": "p3",
+                        "marker": 0,
+                        # "msize": 10,
+                        "mcolor": plot_args[dist]["mcolor"],
+                        "fcolor": plot_args[dist]["mcolor"],
+                        # "fstyle": 3002,
+                        "alpha": .5,
+                        }
+                CMS.cmsDraw(**graph_args)
+                # CMS.cmsDrawLine(
+                        # line = graph,
+                        # lcolor = plot_args[dist]["mcolor"],)
+
+                leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
+
+            # ===== saving plot
+
+            # if upper_pad:
+                # upper_pad.cd()
+                # CMS.fixOverlay()
+                # ratio_pad.cd()
+                # CMS.fixOverlay()
+            # else:
+                # canv.cd()
+                # CMS.fixOverlay()
+
+            CMS.SaveCanvas(canv, outdir+fname+"_" + top+".pdf")
 
 if __name__ == "__main__":
     main()
