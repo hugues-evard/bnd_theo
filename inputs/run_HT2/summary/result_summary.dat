@@ -1,0 +1,27 @@
+
+                    /--------------------------------------------------\
+                    |                Final result for:                 |
+                    |        p p --> top anti-top  @ 13 TeV LHC        |
+                    \--------------------------------------------------/
+
+<MATRIX-RESULT> 2 separate runs were made
+
+                #--------\
+                # LO-run |
+                #--------/
+<MATRIX-RESULT> PDF: NNPDF31_lo_as_0118
+<MATRIX-RESULT> Total rate (possibly within cuts):
+<MATRIX-RESULT> -------------------------------------------------------------
+<MATRIX-RESULT> LO:4.421e+05 fb +/- 3.5e+02 fb (muR, muF unc.: +28.7% -20.9%)
+<MATRIX-RESULT> -------------------------------------------------------------
+
+                #---------\
+                # NLO-run |
+                #---------/
+<MATRIX-RESULT> PDF: NNPDF31_nlo_as_0118
+<MATRIX-RESULT> Total rate (possibly within cuts):
+<MATRIX-RESULT> ------------------------------------------------------------------
+<MATRIX-RESULT> LO:     4.484e+05 fb +/- 3.6e+02 fb (muR, muF unc.: +28.7% -20.9%)
+<MATRIX-RESULT> NLO.QCD:6.987e+05 fb +/- 3.9e+02 fb (muR, muF unc.: +12.5% -12.2%)
+<MATRIX-RESULT> ------------------------------------------------------------------
+

@@ -1,0 +1,17 @@
+
+                    /--------------------------------------------------\
+                    |                Final result for:                 |
+                    |        p p --> top anti-top  @ 13 TeV LHC        |
+                    \--------------------------------------------------/
+
+<MATRIX-RESULT> 1 separate run was made
+
+                #--------\
+                # LO-run |
+                #--------/
+<MATRIX-RESULT> PDF: NNPDF31_lo_as_0118
+<MATRIX-RESULT> Total rate (possibly within cuts):
+<MATRIX-RESULT> -------------------------------------------------------------
+<MATRIX-RESULT> LO:4.421e+05 fb +/- 3.5e+02 fb (muR, muF unc.: +28.7% -20.9%)
+<MATRIX-RESULT> -------------------------------------------------------------
+
