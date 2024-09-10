@@ -129,7 +129,7 @@ def main():
                     extraSpace  = 0.075,
                     )
 
-            leg = create_leg( n_legentries = 2)
+            leg = create_leg( n_legentries = 4)
 
             # =========== reading data
 
@@ -179,6 +179,24 @@ def main():
                         # lcolor = plot_args[dist]["mcolor"],)
 
                 leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
+
+            infile.Close()
+
+            # ==== Data
+
+            infile = rt.TFile.Open("./inputs/HEPData-ins1663958-v2-root.root", "read")
+
+            table_idx = {"t1": "Table 174", "t2": "Table 176"}[top]
+
+            table = infile.Get(table_idx)
+            graph = table.Get("Graph1D_y1")
+            CMS.cmsDraw(h = graph, style = "p3", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            leg.AddEntry(graph, "Data", "lp")
+
+
+            # import pdb; pdb.set_trace()
+
+
 
             # ===== saving plot
 
