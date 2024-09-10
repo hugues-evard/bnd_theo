@@ -74,6 +74,37 @@ def dat_to_graph(infile, graph_name):
 
     return graph
 
+def dat_to_TH1F(infile, hist_name):
+    """ Convert a single distribution from a .dat file to a TGraphAssymErrors object """
+
+    arr = np.genfromtxt(infile, usecols=(0,1,2,3,4,5))
+
+    # number of bins
+    nbins = len(arr) - 1
+
+    # binning
+    bin_low = arr[:-1,0]
+    bin_high = arr[1:,0]
+    bin_center = (bin_high + bin_low) / 2
+
+    edges = array('d', arr[:, 0])
+
+    # scale value
+    scale_center = arr[:, 1]
+    scale_low = arr[:, 3]
+    scale_high = arr[:, 5]
+
+    # ======== converting to TH1F
+
+    # hist = rt.TH1F(hist_name + "_TH1F", hist_name + "_TH1F", nbins, array('d', list(bin_low) + [bin_high[-1]]))
+    hist = rt.TH1F(hist_name + "_TH1F", hist_name + "_TH1F", nbins - 1, array('d', list(bin_low)))
+
+    # == filling the hist
+    for i in range(nbins- 1):
+        hist.SetBinContent(i+1, scale_center[i])
+
+    return hist
+
 # ===========
 
 def dir_to_root(indir, outpath, varlist):
@@ -86,6 +117,9 @@ def dir_to_root(indir, outpath, varlist):
     for var in varlist:
         graph = dat_to_graph(indir + var + ".dat", var)
         graph.Write()
+
+        hist = dat_to_TH1F(indir + var + ".dat", var)
+        hist.Write()
 
     # ==== close the output file
     outfile.Close()

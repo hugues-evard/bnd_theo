@@ -31,11 +31,11 @@ def create_canvas(
 
     # ==== Set top right text
 
-    CMS.SetLumi("Simulation, 13 TeV")
+    CMS.SetLumi("2016, 35.8 fb^{#minus1}", unit = None)
 
     # ==== Set up left text inside canvas
 
-    CMS.SetExtraText("")
+    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = XX.XX%")
 
     # ==== Create ref to upper and ratio pad
 
@@ -61,11 +61,11 @@ def create_canvas(
         upper_pad.SetLogy(logAxis["y"])
         upper_pad.SetLogx(logAxis["x"])
         ratio_pad.cd()
-        ref_line = ROOT.TLine(canv_infos["x_min"], 1, canv_infos["x_max"], 1)
-        CMS.cmsDrawLine(ref_line, lcolor=ROOT.kBlack, lstyle=ROOT.kDotted, lwidth=2)
+        ref_line = rt.TLine(canv_infos["x_min"], 1, canv_infos["x_max"], 1)
+        CMS.cmsDrawLine(ref_line, lcolor=rt.kBlack, lstyle=rt.kDotted, lwidth=2)
         upper_pad.cd()
 
-    return canv
+    return canv, upper_pad, ratio_pad
 
 # ===========
 
@@ -108,9 +108,9 @@ def main():
 
     indir = "./outputs/"
     outdir = "./plots/"
-    scales = ["HT_2", "HT_4", "m_ttx_2"]
+    scales = ["HT_2"] #, "HT_4", "m_ttx_2"]
 
-    for top in ["t1", "t2"]:
+    for top in ["t1"]: #, "t2"]:
 
         top_label = {"t1": "t_{high}", "t2": "t_{low}"}[top]
 
@@ -118,18 +118,40 @@ def main():
 
             # =========== creating canvas and legend
 
-            canv = create_canvas(
+            canv, upper_pad, ratio_pad = create_canvas(
                     canvName    = "test_canvas",
-                    # ranges      = {"x": (0., 800.), "y": (1., 15000.)}, #, "r": (-1., 1.)},
-                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.)}, #, "r": (-1., 1.)},
+                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.), "r": (0., 2.)},
                     logAxis     = {"x": False, "y": True}, 
-                    nameAxis    = {"x": "p_{T, t}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]"}, # "r": "ratio axis"},
+                    nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,
                     iPos        = 10, 
-                    extraSpace  = 0.075,
+                    extraSpace  = 0.025,
                     )
 
             leg = create_leg( n_legentries = 4)
+
+            # ==== ratio pad
+
+            ratio_pad.cd()
+            ref_line = rt.TLine(0, 1, 800, 1)
+            CMS.cmsDrawLine(ref_line, lcolor=rt.kBlack, lstyle=rt.kDotted, lwidth=2)
+
+            # ==== Readingg and plotting Data
+
+            infile = rt.TFile.Open("./inputs/HEPData-ins1663958-v2-root.root", "read")
+
+            table_idx = {"t1": "Table 174", "t2": "Table 176"}[top]
+
+            table = infile.Get(table_idx)
+            data_graph = table.Get("Graph1D_y1")
+            data_hist = table.Get("Hist1D_y1")
+            data_hist.SetDirectory(0)
+
+            upper_pad.cd()
+            CMS.cmsDraw(h = data_graph, style = "p3", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            leg.AddEntry(data_graph, "Data", "lp")
+
+            infile.Close()
 
             # =========== reading data
 
@@ -153,6 +175,8 @@ def main():
 
             # TODO: same distribution, at different orders, + data and ratio plot
 
+            hist_list = []
+
             for dist in [
                 f"plot.pT_{top}..LO",
                 f"plot.pT_{top}..NLO.QCD",
@@ -160,6 +184,9 @@ def main():
                 ]:
 
                 graph = infile.Get(dist)
+                hist = infile.Get(dist + "_TH1F")
+                hist.SetDirectory(0)
+                hist_list.append(hist)
 
                 # =========== plotting
 
@@ -182,32 +209,43 @@ def main():
 
             infile.Close()
 
-            # ==== Data
+            # ===== ratio pad
 
-            infile = rt.TFile.Open("./inputs/HEPData-ins1663958-v2-root.root", "read")
+            # import pdb; pdb.set_trace()
+            ratio_pad.cd()
+            # data_ratio = data_graph#.Copy()
+            # LO_hist = hist_list[0]#.Copy()
+            # NLO_hist = hist_list[1]#.Copy()
+            # NNLO_hist = hist_list[2]#.Copy()
 
-            table_idx = {"t1": "Table 174", "t2": "Table 176"}[top]
+            data_ratio = rt.TGraphAsymmErrors()
+            LO_ratio = rt.TGraphAsymmErrors()
+            NLO_ratio = rt.TGraphAsymmErrors()
+            
+            # nbins = NNLO_hist.GetXaxis().GetNbins()
 
-            table = infile.Get(table_idx)
-            graph = table.Get("Graph1D_y1")
-            CMS.cmsDraw(h = graph, style = "p3", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
-            leg.AddEntry(graph, "Data", "lp")
-
+            # bin_edges = [NNLO_hist.GetXaxis().GetBinLowEdge(i) for i in range(nbins)] + [NNLO_hist.GetXaxis().GetBinUpEdge(nbins-1)]
 
             # import pdb; pdb.set_trace()
 
+            data_ratio.Divide(data_hist, hist_list[2], "pois")
+            # LO_ratio.Divide(hist_list[0], hist_list[2], "pois")
+            # NLO_ratio.Divide(hist_list[1], hist_list[2], "pois")
 
-
+            CMS.cmsDraw(h = data_ratio, style = "p", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            # CMS.cmsDraw(h = LO_ratio, style = "p", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
+            # CMS.cmsDraw(h = NLO_ratio, style = "p", marker = 0, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
+# 
             # ===== saving plot
 
-            # if upper_pad:
-                # upper_pad.cd()
-                # CMS.fixOverlay()
-                # ratio_pad.cd()
-                # CMS.fixOverlay()
-            # else:
-                # canv.cd()
-                # CMS.fixOverlay()
+            if upper_pad:
+                upper_pad.cd()
+                CMS.fixOverlay()
+                ratio_pad.cd()
+                CMS.fixOverlay()
+            else:
+                canv.cd()
+                CMS.fixOverlay()
 
             CMS.SaveCanvas(canv, outdir+fname+"_" + top+".pdf")
 
