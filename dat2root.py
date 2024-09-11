@@ -157,7 +157,7 @@ if __name__ == "__main__":
         ]
 
     # for scale in ["HT2", "mttbar2"]:
-    for scale in ["HT_2", "HT_4", "m_ttx_2"]:
+    for scale in ["HT_2", "HT_4", "m_ttx_2", "mT_tx"]:
 
         # indir = f"./inputs/run_{scale}/NLO-run/distributions__NLO_QCD/"
         indir = f"./inputs/{scale}/"

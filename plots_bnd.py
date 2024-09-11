@@ -9,7 +9,6 @@ def create_canvas(
         nameAxis,   # Dict[str, str],
         logAxis     = {"x": False, "y": True, "z": False},
         square      = CMS.kRectangular,
-        iPos        = 11,
         extraSpace  = 0,
         ):
     """ Create a canvas object """
@@ -25,7 +24,6 @@ def create_canvas(
         "nameXaxis": nameAxis["x"],
         "nameYaxis": nameAxis["y"],
         "square": square,
-        "iPos": iPos,
         "extraSpace": extraSpace,
     }
 
@@ -108,7 +106,7 @@ def main():
 
     indir = "./outputs/"
     outdir = "./plots/"
-    scales = ["HT_2", "HT_4", "m_ttx_2"]
+    scales = ["HT_2", "HT_4", "m_ttx_2", "mT_tx"]
 
     for top in ["t1", "t2"]:
 
@@ -124,7 +122,6 @@ def main():
                     logAxis     = {"x": False, "y": True}, 
                     nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,
-                    iPos        = 10, 
                     extraSpace  = 0.025,
                     )
 
@@ -201,9 +198,9 @@ def main():
                         "alpha": .5,
                         }
                 CMS.cmsDraw(**graph_args)
-                # CMS.cmsDrawLine(
-                        # line = graph,
-                        # lcolor = plot_args[dist]["mcolor"],)
+                CMS.cmsDrawLine(
+                        line = graph,
+                        lcolor = plot_args[dist]["mcolor"],)
 
                 leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
 
@@ -222,11 +219,9 @@ def main():
             LO_ratio.Divide(NNLO_hist)
             NLO_ratio.Divide(NNLO_hist)
 
-            # import pdb; pdb.set_trace()
-
-            CMS.cmsDraw(h = data_ratio, style = "e3", marker = 1, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
-            CMS.cmsDraw(h = LO_ratio, style = "e3", marker = 1, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
-            CMS.cmsDraw(h = NLO_ratio, style = "e3", marker = 1, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
+            CMS.cmsDraw(h = data_ratio, style = "e", marker = 1, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            CMS.cmsDraw(h = LO_ratio, style = "e", marker = 1, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
+            CMS.cmsDraw(h = NLO_ratio, style = "e", marker = 1, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
 # 
             # ===== saving plot
 
