@@ -71,10 +71,10 @@ def dat_to_graph(infile, graph_name):
 
     graph = rt.TGraphAsymmErrors()
     graph.SetName(graph_name)
-    graph.Set(nbins)
+    graph.Set(nbins-1)
 
     # == filling the graph
-    for i in range(nbins):
+    for i in range(nbins-1):
         graph.SetPoint(i, bin_center[i], scale_center[i])
         graph.SetPointError(i, bin_center[i] - bin_low[i], bin_high[i] - bin_center[i],
             scale_center[i] - scale_low[i], scale_high[i] - scale_center[i],

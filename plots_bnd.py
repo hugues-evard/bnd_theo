@@ -33,7 +33,7 @@ def create_canvas(
 
     # ==== Set up left text inside canvas
 
-    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = 29.2% (l = e, \mu)")
+    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = 29.2% (l = e, \mu)" )
 
     # ==== Create ref to upper and ratio pad
 
@@ -118,7 +118,7 @@ def main():
 
             canv, upper_pad, ratio_pad = create_canvas(
                     canvName    = "test_canvas",
-                    ranges      = {"x": (0., 800.), "y": (1.e-6, 1.e2), "r": (-5., 5.)},
+                    ranges      = {"x": (0., 800.), "y": (5.e-4, 1.e1), "r": (0., 1.2)},
                     logAxis     = {"x": False, "y": True}, 
                     nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,
@@ -126,6 +126,11 @@ def main():
                     )
 
             leg = create_leg( n_legentries = 4)
+
+            # latex.SetTextFont(font)
+            # latex.SetTextAlign(align)
+            # latex.SetTextSize(size)
+            # latex.DrawLatex(posX, posY, text)
 
             # ==== ratio pad
 
@@ -145,7 +150,7 @@ def main():
             data_hist.SetDirectory(0)
 
             upper_pad.cd()
-            CMS.cmsDraw(h = data_graph, style = "p3", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            CMS.cmsDraw(h = data_graph, style = "", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
             leg.AddEntry(data_graph, "Data", "lp")
 
             infile.Close()
@@ -155,7 +160,7 @@ def main():
             # plotting kwargs
             plot_args = {
                 f"plot.pT_{top}..LO": {
-                    "mcolor": rt.kBlack,
+                    "mcolor": rt.kBlue,
                     "leg_entry": "LO",
                 },
                 f"plot.pT_{top}..NLO.QCD": {
@@ -163,7 +168,7 @@ def main():
                     "leg_entry": "NLO",
                 },
                 f"plot.pT_{top}..NNLO.QCD": {
-                    "mcolor": rt.kBlue,
+                    "mcolor": rt.kGreen,
                     "leg_entry": "NNLO",
                 },
             }
@@ -189,7 +194,7 @@ def main():
 
                 graph_args = {
                         "h": graph,
-                        "style": "p3",
+                        "style": "",
                         "marker": 0,
                         # "msize": 10,
                         "mcolor": plot_args[dist]["mcolor"],
@@ -198,9 +203,6 @@ def main():
                         "alpha": .5,
                         }
                 CMS.cmsDraw(**graph_args)
-                CMS.cmsDrawLine(
-                        line = graph,
-                        lcolor = plot_args[dist]["mcolor"],)
 
                 leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
 
@@ -214,15 +216,21 @@ def main():
             NLO_ratio = hist_list[1].Clone()
             NNLO_hist = hist_list[2].Clone()
 
-
             data_ratio.Divide(NNLO_hist)
             LO_ratio.Divide(NNLO_hist)
             NLO_ratio.Divide(NNLO_hist)
 
-            CMS.cmsDraw(h = data_ratio, style = "e", marker = 1, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
-            CMS.cmsDraw(h = LO_ratio, style = "e", marker = 1, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
-            CMS.cmsDraw(h = NLO_ratio, style = "e", marker = 1, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
-# 
+            # import pdb; pdb.set_trace()
+
+
+            # CMS.cmsDraw(h = data_ratio, style = "L", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
+            # CMS.cmsDraw(h = LO_ratio, style = "L", marker = 0, mcolor = rt.kBlue, fcolor = rt.kBlue, alpha = .5)
+            # CMS.cmsDraw(h = NLO_ratio, style = "L", marker = 0, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
+
+            CMS.cmsDrawLine(line = data_ratio,  lcolor = rt.kBlack, lstyle=rt.kSolid)
+            CMS.cmsDrawLine(line = LO_ratio,  lcolor = rt.kBlue)
+            CMS.cmsDrawLine(line = NLO_ratio,  lcolor = rt.kRed)
+ 
             # ===== saving plot
 
             if upper_pad:
