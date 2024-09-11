@@ -29,7 +29,7 @@ def create_canvas(
 
     # ==== Set top right text
 
-    CMS.SetLumi("2016, 35.8 fb^{#minus1}", unit = None)
+    # CMS.SetLumi("2016, 35.8 fb^{#minus1}", unit = None)
 
     # ==== Set up left text inside canvas
 
@@ -114,11 +114,19 @@ def main():
 
         for fname in scales:
 
+            text_label = {
+                    'HT_2': 'H_{T} / 2',
+                    'HT_4': 'H_{T} / 4',
+                    'm_ttx_2': r'm_{t\bar{t}} / 2',
+                    'mT_tx': r'm_{T, \bar{t}}',
+                    }[fname]
+            CMS.SetLumi(text_label + "          2016, 35.8 fb^{#minus1}", unit = None)
+
             # =========== creating canvas and legend
 
             canv, upper_pad, ratio_pad = create_canvas(
                     canvName    = "test_canvas",
-                    ranges      = {"x": (0., 800.), "y": (5.e-4, 1.e1), "r": (0., 1.2)},
+                    ranges      = {"x": (0., 800.), "y": (5.e-4, 1.e1), "r": (0.2, 1.3)},
                     logAxis     = {"x": False, "y": True}, 
                     nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,
@@ -126,6 +134,7 @@ def main():
                     )
 
             leg = create_leg( n_legentries = 4)
+
 
             # latex.SetTextFont(font)
             # latex.SetTextAlign(align)
@@ -140,20 +149,29 @@ def main():
 
             # ==== Readingg and plotting Data
 
-            infile = rt.TFile.Open("./inputs/HEPData-ins1663958-v2-root.root", "read")
+            infile = rt.TFile.Open(indir + fname + ".root", "read")
 
-            table_idx = {"t1": "Table 174", "t2": "Table 176"}[top]
+            # infile = rt.TFile.Open("./inputs/HEPData-ins1663958-v2-root.root", "read")
 
-            table = infile.Get(table_idx)
-            data_graph = table.Get("Graph1D_y1")
-            data_hist = table.Get("Hist1D_y1")
-            data_hist.SetDirectory(0)
+            # table_idx = {"t1": "Table 174", "t2": "Table 176"}[top]
+# 
+            # table = infile.Get(table_idx)
+            # data_graph = table.Get("Graph1D_y1")
+            # data_hist = table.Get("Hist1D_y1")
+            # data_hist.SetDirectory(0)
+
+            data_graph = infile.Get(f'{top}_data')
+            data_norm = infile.Get(f'{top}_normalized_data')
 
             upper_pad.cd()
             CMS.cmsDraw(h = data_graph, style = "", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
             leg.AddEntry(data_graph, "Data", "lp")
 
-            infile.Close()
+            ratio_pad.cd()
+            CMS.cmsDraw(h = data_norm, style = "", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
+
+
+            # infile.Close()
 
             # =========== reading data
 
@@ -172,8 +190,6 @@ def main():
                     "leg_entry": "NNLO",
                 },
             }
-
-            infile = rt.TFile.Open(indir + fname + ".root", "read")
 
             # TODO: same distribution, at different orders, + data and ratio plot
 
