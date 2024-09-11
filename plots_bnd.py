@@ -35,7 +35,7 @@ def create_canvas(
 
     # ==== Set up left text inside canvas
 
-    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = XX.XX%")
+    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = 43.8%")
 
     # ==== Create ref to upper and ratio pad
 
@@ -120,7 +120,7 @@ def main():
 
             canv, upper_pad, ratio_pad = create_canvas(
                     canvName    = "test_canvas",
-                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.), "r": (-5., 5.)},
+                    ranges      = {"x": (0., 800.), "y": (1.e-6, 1.e2), "r": (-5., 5.)},
                     logAxis     = {"x": False, "y": True}, 
                     nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,

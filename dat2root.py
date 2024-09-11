@@ -3,6 +3,7 @@ from array import array
 import numpy as np
 
 # ===========
+BR = 0.438
 
 def dat_to_graph_old(infile, graph_name):
     """ Convert a single distribution from a .dat file to a TGraphAssymErrors object """
@@ -59,6 +60,12 @@ def dat_to_graph(infile, graph_name):
     scale_low = arr[:, 3]
     scale_high = arr[:, 5]
 
+    # multiplying scale by BR
+    global BR
+    scale_center *= BR
+    scale_low *= BR
+    scale_high *= BR
+
     # ======== converting to TGraphAsymmErrors
 
     graph = rt.TGraphAsymmErrors()
@@ -93,6 +100,12 @@ def dat_to_TH1F(infile, hist_name):
     scale_center = arr[:, 1]
     scale_low = arr[:, 3]
     scale_high = arr[:, 5]
+
+    # Multiplying scale by BR:
+    global BR
+    scale_center *= BR
+    scale_low *= BR
+    scale_high *= BR
 
     # ======== converting to TH1F
 
