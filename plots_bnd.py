@@ -35,7 +35,7 @@ def create_canvas(
 
     # ==== Set up left text inside canvas
 
-    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = 43.8%")
+    CMS.SetExtraText(r"BR(t\bar{t}\rightarrowq\bar{q'}l^{\pm}\nu_{l}) = 29.2% (l = e, \mu)")
 
     # ==== Create ref to upper and ratio pad
 

@@ -3,7 +3,8 @@ from array import array
 import numpy as np
 
 # ===========
-BR = 0.438
+BR = 0.438 * 2./3.
+# 43.8% for semileptonic, 2/3 for only e and μ, not τ
 
 def dat_to_graph_old(infile, graph_name):
     """ Convert a single distribution from a .dat file to a TGraphAssymErrors object """
