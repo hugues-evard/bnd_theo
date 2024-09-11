@@ -102,6 +102,9 @@ def create_leg(
 
 def main():
 
+    palette = ['#5790fc', '#f89c20', '#e42536']
+    root_palette = [rt.TColor.GetColor(c) for c in palette]
+
     # ======== I/O
 
     indir = "./outputs/"
@@ -114,13 +117,7 @@ def main():
 
         for fname in scales:
 
-            text_label = {
-                    'HT_2': 'H_{T} / 2',
-                    'HT_4': 'H_{T} / 4',
-                    'm_ttx_2': r'm_{t\bar{t}} / 2',
-                    'mT_tx': r'm_{T, \bar{t}}',
-                    }[fname]
-            CMS.SetLumi(text_label + "          2016, 35.8 fb^{#minus1}", unit = None)
+            CMS.SetLumi("2016, 35.8 fb^{#minus1}", unit = None)
 
             # =========== creating canvas and legend
 
@@ -135,11 +132,24 @@ def main():
 
             leg = create_leg( n_legentries = 4)
 
+            # text label
 
-            # latex.SetTextFont(font)
-            # latex.SetTextAlign(align)
-            # latex.SetTextSize(size)
-            # latex.DrawLatex(posX, posY, text)
+            text_label = {
+                    'HT_2': 'H_{T} / 2',
+                    'HT_4': 'H_{T} / 4',
+                    'm_ttx_2': r'm_{t\bar{t}} / 2',
+                    'mT_tx': r'm_{T, \bar{t}}',
+                    }[fname]
+
+            scale_label = rt.TLatex()
+            scale_label.SetNDC()
+            scale_label.SetTextAngle(0)
+            scale_label.SetTextColor(rt.kBlack)
+            scale_label.SetTextFont(52)
+            scale_label.SetTextAlign(11)
+            scale_label.SetTextSize(0.06)
+
+            scale_label.DrawLatex(0.3, 0.838, text_label)
 
             # ==== ratio pad
 
@@ -178,15 +188,15 @@ def main():
             # plotting kwargs
             plot_args = {
                 f"plot.pT_{top}..LO": {
-                    "mcolor": rt.kBlue,
+                    "mcolor": root_palette[0],
                     "leg_entry": "LO",
                 },
                 f"plot.pT_{top}..NLO.QCD": {
-                    "mcolor": rt.kRed,
+                    "mcolor": root_palette[1],
                     "leg_entry": "NLO",
                 },
                 f"plot.pT_{top}..NNLO.QCD": {
-                    "mcolor": rt.kGreen,
+                    "mcolor": root_palette[2],
                     "leg_entry": "NNLO",
                 },
             }
@@ -255,7 +265,6 @@ def main():
             # LO_ratio.Divide(NNLO_hist)
             # NLO_ratio.Divide(NNLO_hist)
 # 
-            # import pdb; pdb.set_trace()
 # 
 # 
             # CMS.cmsDraw(h = data_ratio, style = "L", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
@@ -277,8 +286,18 @@ def main():
                 canv.cd()
                 CMS.fixOverlay()
 
+            # ==== size of axis labels
+
+            # rt.gStyle.SetLabelSize(0.003, "XYZ")
+            # rt.gPad.RedrawAxis()
+            # CMS.FixXAxisPartition(canv, bins = [0, 40, 80, 120, 160, 200, 240, 280, 330, 380, 430, 500, 800])
+            # import pdb; pdb.set_trace()
+
+
             CMS.SaveCanvas(canv, outdir+fname+"_" + top+".pdf")
 
 if __name__ == "__main__":
+    # CMS.setCMSStyle()
+    # CMS.cmsStyle.SetLabelSize(0.003, "XYZ")
     main()
 
