@@ -67,12 +67,6 @@ def dat_to_ratio(infile, graph_name):
     scale_low = arr[:, 3]
     scale_high = arr[:, 5]
 
-    # multiplying scale by BR
-    # global BR
-    # scale_center *= BR
-    # scale_low *= BR
-    # scale_high *= BR
-
     # ======== Normalizing
 
     den_arr = np.genfromtxt('..'.join(infile.split('..')[:-1] + ['NNLO.QCD.dat']), usecols = (1))
@@ -96,41 +90,40 @@ def dat_to_ratio(infile, graph_name):
 
     return graph
 
-def dat_to_TH1F(infile, hist_name):
-    """ Convert a single distribution from a .dat file to a TGraphAssymErrors object """
+def normalize_data(indir, top):
+    """ Convert a single distribution from a .dat file to a TGraphAssymErrors object, normalized to NNLO """
 
-    arr = np.genfromtxt(infile, usecols=(0,1,2,3,4,5))
+    scale_nnlo = np.genfromtxt(indir + f'plot.pT_{top}..NNLO.QCD.dat', usecols=(1))
+
+    global BR
+    scale_nnlo *= BR
 
     # number of bins
-    nbins = len(arr) - 1
+    nbins = len(scale_nnlo) - 1
 
-    # binning
-    bin_low = arr[:-1,0]
-    bin_high = arr[1:,0]
-    bin_center = (bin_high + bin_low) / 2
+    # ======== getting data 
 
-    edges = array('d', arr[:, 0])
+    table_idx = {'t1': 'Table 174', 't2': 'Table 176'}[top]
 
-    # scale value
-    scale_center = arr[:, 1]
-    scale_low = arr[:, 3]
-    scale_high = arr[:, 5]
+    datafile = rt.TFile.Open('./inputs/HEPData-ins1663958-v2-root.root', 'read')
+    table = datafile.Get(table_idx)
+    graph = table.Get("Graph1D_y1")
+    norm_graph = graph.Clone()
 
-    # Multiplying scale by BR:
-    global BR
-    scale_center *= BR
-    scale_low *= BR
-    scale_high *= BR
+    graph.SetName(top + '_data')
+    norm_graph.SetName(top + '_normalized_data')
 
-    # ======== converting to TH1F
+    datafile.Close()
 
-    hist = rt.TH1F(hist_name + "_TH1F", hist_name + "_TH1F", nbins - 1, array('d', list(bin_low)))
+    # ======== Normalizing
 
-    # == filling the hist
-    for i in range(nbins- 1):
-        hist.SetBinContent(i+1, scale_center[i])
+    for i in range(nbins-1):
+        norm_graph.SetPointY(i, graph.GetPointY(i) / scale_nnlo[i])
+        norm_graph.SetPointEYlow(i, graph.GetErrorYlow(i) / scale_nnlo[i])
+        norm_graph.SetPointEYhigh(i, graph.GetErrorYhigh(i) / scale_nnlo[i])
 
-    return hist
+    return graph, norm_graph
+
 
 # ===========
 
@@ -138,6 +131,9 @@ def dir_to_root(indir, outpath, varlist):
     """ Convert a list of distribution in a given directory to a single .root output """
 
     # ==== Create a single output file for the whole directory
+    data_graph_t1, data_ratio_graph_t1 = normalize_data(indir, 't1')
+    data_graph_t2, data_ratio_graph_t2 = normalize_data(indir, 't2')
+
     outfile = rt.TFile.Open(outpath, "recreate")
 
     # ==== read, convert and write each distribution to a graph
@@ -148,8 +144,13 @@ def dir_to_root(indir, outpath, varlist):
         ratio_graph = dat_to_ratio(indir + var + ".dat", var)
         ratio_graph.Write()
 
-        hist = dat_to_TH1F(indir + var + ".dat", var)
-        hist.Write()
+    # ==== add normalized data
+    
+    data_graph_t1.Write()
+    data_ratio_graph_t1.Write()
+
+    data_graph_t2.Write()
+    data_ratio_graph_t2.Write()
 
     # ==== close the output file
     outfile.Close()
