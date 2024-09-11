@@ -185,10 +185,12 @@ def main():
                 f"plot.pT_{top}..NNLO.QCD",
                 ]:
 
+                upper_pad.cd()
+
                 graph = infile.Get(dist)
-                hist = infile.Get(dist + "_TH1F")
-                hist.SetDirectory(0)
-                hist_list.append(hist)
+                # hist = infile.Get(dist + "_TH1F")
+                # hist.SetDirectory(0)
+                # hist_list.append(hist)
 
                 # =========== plotting
 
@@ -206,30 +208,47 @@ def main():
 
                 leg.AddEntry(graph, plot_args[dist]["leg_entry"], "lp")
 
+                ratio_pad.cd()
+
+                graph = infile.Get(dist + "_ratio")
+
+                graph_args = {
+                        "h": graph,
+                        "style": "",
+                        "marker": 0,
+                        # "msize": 10,
+                        "mcolor": plot_args[dist]["mcolor"],
+                        "fcolor": plot_args[dist]["mcolor"],
+                        # "fstyle": 3002,
+                        "alpha": .5,
+                        }
+
+                CMS.cmsDraw(**graph_args)
+
             infile.Close()
 
             # ===== ratio pad
 
-            ratio_pad.cd()
-            data_ratio = data_hist.Clone()
-            LO_ratio = hist_list[0].Clone()
-            NLO_ratio = hist_list[1].Clone()
-            NNLO_hist = hist_list[2].Clone()
-
-            data_ratio.Divide(NNLO_hist)
-            LO_ratio.Divide(NNLO_hist)
-            NLO_ratio.Divide(NNLO_hist)
-
+            # ratio_pad.cd()
+            # data_ratio = data_hist.Clone()
+            # LO_ratio = hist_list[0].Clone()
+            # NLO_ratio = hist_list[1].Clone()
+            # NNLO_hist = hist_list[2].Clone()
+# 
+            # data_ratio.Divide(NNLO_hist)
+            # LO_ratio.Divide(NNLO_hist)
+            # NLO_ratio.Divide(NNLO_hist)
+# 
             # import pdb; pdb.set_trace()
-
-
+# 
+# 
             # CMS.cmsDraw(h = data_ratio, style = "L", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
             # CMS.cmsDraw(h = LO_ratio, style = "L", marker = 0, mcolor = rt.kBlue, fcolor = rt.kBlue, alpha = .5)
             # CMS.cmsDraw(h = NLO_ratio, style = "L", marker = 0, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
-
-            CMS.cmsDrawLine(line = data_ratio,  lcolor = rt.kBlack, lstyle=rt.kSolid)
-            CMS.cmsDrawLine(line = LO_ratio,  lcolor = rt.kBlue)
-            CMS.cmsDrawLine(line = NLO_ratio,  lcolor = rt.kRed)
+# 
+            # CMS.cmsDrawLine(line = data_ratio,  lcolor = rt.kBlack, lstyle=rt.kSolid)
+            # CMS.cmsDrawLine(line = LO_ratio,  lcolor = rt.kBlue)
+            # CMS.cmsDrawLine(line = NLO_ratio,  lcolor = rt.kRed)
  
             # ===== saving plot
 
