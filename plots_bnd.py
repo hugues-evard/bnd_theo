@@ -108,9 +108,9 @@ def main():
 
     indir = "./outputs/"
     outdir = "./plots/"
-    scales = ["HT_2"] #, "HT_4", "m_ttx_2"]
+    scales = ["HT_2", "HT_4", "m_ttx_2"]
 
-    for top in ["t1"]: #, "t2"]:
+    for top in ["t1", "t2"]:
 
         top_label = {"t1": "t_{high}", "t2": "t_{low}"}[top]
 
@@ -120,7 +120,7 @@ def main():
 
             canv, upper_pad, ratio_pad = create_canvas(
                     canvName    = "test_canvas",
-                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.), "r": (0., 2.)},
+                    ranges      = {"x": (0., 800.), "y": (1.e-7, 15.), "r": (-5., 5.)},
                     logAxis     = {"x": False, "y": True}, 
                     nameAxis    = {"x": f"p_{{T, {top_label}}}", "y": rf"d\sigma/dp_{{T, {top_label}}} [pb #times GeV^{{-1}}]", "r": r"\frac{Data}{NNLO}"},
                     square      = True,
@@ -211,30 +211,22 @@ def main():
 
             # ===== ratio pad
 
-            # import pdb; pdb.set_trace()
             ratio_pad.cd()
-            # data_ratio = data_graph#.Copy()
-            # LO_hist = hist_list[0]#.Copy()
-            # NLO_hist = hist_list[1]#.Copy()
-            # NNLO_hist = hist_list[2]#.Copy()
+            data_ratio = data_hist.Clone()
+            LO_ratio = hist_list[0].Clone()
+            NLO_ratio = hist_list[1].Clone()
+            NNLO_hist = hist_list[2].Clone()
 
-            data_ratio = rt.TGraphAsymmErrors()
-            LO_ratio = rt.TGraphAsymmErrors()
-            NLO_ratio = rt.TGraphAsymmErrors()
-            
-            # nbins = NNLO_hist.GetXaxis().GetNbins()
 
-            # bin_edges = [NNLO_hist.GetXaxis().GetBinLowEdge(i) for i in range(nbins)] + [NNLO_hist.GetXaxis().GetBinUpEdge(nbins-1)]
+            data_ratio.Divide(NNLO_hist)
+            LO_ratio.Divide(NNLO_hist)
+            NLO_ratio.Divide(NNLO_hist)
 
             # import pdb; pdb.set_trace()
 
-            data_ratio.Divide(data_hist, hist_list[2], "pois")
-            # LO_ratio.Divide(hist_list[0], hist_list[2], "pois")
-            # NLO_ratio.Divide(hist_list[1], hist_list[2], "pois")
-
-            CMS.cmsDraw(h = data_ratio, style = "p", marker = 0, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
-            # CMS.cmsDraw(h = LO_ratio, style = "p", marker = 0, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
-            # CMS.cmsDraw(h = NLO_ratio, style = "p", marker = 0, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
+            CMS.cmsDraw(h = data_ratio, style = "e3", marker = 1, mcolor = rt.kGreen, fcolor = rt.kGreen, alpha = .5)
+            CMS.cmsDraw(h = LO_ratio, style = "e3", marker = 1, mcolor = rt.kBlack, fcolor = rt.kBlack, alpha = .5)
+            CMS.cmsDraw(h = NLO_ratio, style = "e3", marker = 1, mcolor = rt.kRed, fcolor = rt.kRed, alpha = .5)
 # 
             # ===== saving plot
 
